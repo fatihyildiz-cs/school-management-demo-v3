@@ -2,7 +2,7 @@ package com.management.schoolmanagementv3.Controller;
 
 import com.management.schoolmanagementv3.Entity.Teacher;
 import com.management.schoolmanagementv3.Exception.ResourceNotFoundException;
-import com.management.schoolmanagementv3.Repository.TeacherRepository;
+import com.management.schoolmanagementv3.Service.TeacherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,18 +14,18 @@ import java.util.Optional;
 public class TeacherController {
 
     @Autowired
-    private TeacherRepository teacherRepository;
+    private TeacherService teacherService;
 
     @GetMapping("/")
     public List<Teacher> getAllTeachers(){
 
-        return teacherRepository.findAll();
+        return teacherService.findAll();
     }
 
     @GetMapping("/{id}")
     public Teacher getTeacherById(@PathVariable Integer id){
 
-        Optional<Teacher> foundTeacher = teacherRepository.findById(id);
+        Optional<Teacher> foundTeacher = teacherService.findById(id);
 
         if(!foundTeacher.isPresent()){
             throw new ResourceNotFoundException("Teacher id: " + id);
@@ -36,25 +36,25 @@ public class TeacherController {
     @PostMapping("/")
     public Teacher createTeacher(@RequestBody Teacher teacher){
 
-        return teacherRepository.save(teacher);
+        return teacherService.save(teacher);
     }
 
     @DeleteMapping("/{id}")
     public void deleteTeacher(@PathVariable Integer id){
 
-        Optional<Teacher> foundTeacher = teacherRepository.findById(id);
+        Optional<Teacher> foundTeacher = teacherService.findById(id);
 
         if(!foundTeacher.isPresent()){
             throw new ResourceNotFoundException("Teacher id: " + id);
         }
 
-        teacherRepository.delete(foundTeacher.get());
+        teacherService.delete(foundTeacher.get());
     }
 
     @PutMapping("/{id}")
     public Teacher updateTeacher(@PathVariable Integer id, @RequestBody Teacher teacher){
 
-        Optional<Teacher> foundTeacher = teacherRepository.findById(id);
+        Optional<Teacher> foundTeacher = teacherService.findById(id);
         if(!foundTeacher.isPresent()){
             throw new ResourceNotFoundException("Teacher id: " + id);
         }
@@ -63,6 +63,6 @@ public class TeacherController {
         actualTeacher.setFirstName(teacher.getFirstName());
         actualTeacher.setLastName(teacher.getLastName());
         actualTeacher.setSubject(teacher.getSubject());
-        return teacherRepository.save(actualTeacher);
+        return teacherService.save(actualTeacher);
     }
 }

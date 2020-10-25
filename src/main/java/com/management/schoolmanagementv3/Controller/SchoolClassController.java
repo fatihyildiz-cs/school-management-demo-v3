@@ -5,9 +5,9 @@ import com.management.schoolmanagementv3.Entity.Student;
 import com.management.schoolmanagementv3.Entity.Teacher;
 import com.management.schoolmanagementv3.Exception.ResourceAlreadyExistsException;
 import com.management.schoolmanagementv3.Exception.ResourceNotFoundException;
-import com.management.schoolmanagementv3.Repository.SchoolClassRepository;
-import com.management.schoolmanagementv3.Repository.StudentRepository;
-import com.management.schoolmanagementv3.Repository.TeacherRepository;
+import com.management.schoolmanagementv3.Service.SchoolClassService;
+import com.management.schoolmanagementv3.Service.StudentService;
+import com.management.schoolmanagementv3.Service.TeacherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,22 +20,22 @@ import java.util.Set;
 public class SchoolClassController {
 
     @Autowired
-    private SchoolClassRepository schoolClassRepository;
+    private StudentService studentService;
     @Autowired
-    private StudentRepository studentRepository;
+    private TeacherService teacherService;
     @Autowired
-    private TeacherRepository teacherRepository;
+    private SchoolClassService schoolClassService;
 
     @GetMapping("/")
     public List<SchoolClass> getAllClasses(){
 
-        return schoolClassRepository.findAll();
+        return schoolClassService.findAll();
     }
 
     @GetMapping("/{id}")
     public SchoolClass getClassById(@PathVariable Integer id){
 
-        Optional<SchoolClass> foundClass = schoolClassRepository.findById(id);
+        Optional<SchoolClass> foundClass = schoolClassService.findById(id);
         if(!foundClass.isPresent()){
             throw new ResourceNotFoundException("Class id: " + id);
         }
@@ -46,23 +46,23 @@ public class SchoolClassController {
     @PostMapping("/")
     public SchoolClass createClass(@RequestBody SchoolClass schoolClass){
 
-        return schoolClassRepository.save(schoolClass);
+        return schoolClassService.save(schoolClass);
     }
 
     @DeleteMapping("/{id}")
     public void deleteClass(@PathVariable Integer id){
 
-        Optional<SchoolClass> foundClass = schoolClassRepository.findById(id);
+        Optional<SchoolClass> foundClass = schoolClassService.findById(id);
         if(!foundClass.isPresent()){
             throw new ResourceNotFoundException("Class id: " + id);
         }
-        schoolClassRepository.delete(foundClass.get());
+        schoolClassService.delete(foundClass.get());
     }
 
     @PutMapping("/{id}")
     public SchoolClass updateClass(@PathVariable Integer id, @RequestBody SchoolClass schoolClass){
 
-        Optional<SchoolClass> foundClass = schoolClassRepository.findById(id);
+        Optional<SchoolClass> foundClass = schoolClassService.findById(id);
         if(!foundClass.isPresent()){
             throw new ResourceNotFoundException("Class id: " + id);
         }
@@ -72,13 +72,13 @@ public class SchoolClassController {
         actualClass.setStudentCount(schoolClass.getStudentCount());
         actualClass.setYear(schoolClass.getYear());
 
-        return schoolClassRepository.save(actualClass);
+        return schoolClassService.save(actualClass);
     }
 
     @GetMapping("/{id}/students")
     public List<Student> getStudentsOfClass(@PathVariable Integer id){
 
-        Optional<SchoolClass> foundClass = schoolClassRepository.findById(id);
+        Optional<SchoolClass> foundClass = schoolClassService.findById(id);
         if(!foundClass.isPresent()){
             throw new ResourceNotFoundException("Class id: " + id);
         }
@@ -89,7 +89,7 @@ public class SchoolClassController {
     @GetMapping("/{id}/teachers")
     public Set<Teacher> getTeachersOfClass(@PathVariable Integer id){
 
-        Optional<SchoolClass> foundClass = schoolClassRepository.findById(id);
+        Optional<SchoolClass> foundClass = schoolClassService.findById(id);
         if(!foundClass.isPresent()){
             throw new ResourceNotFoundException("Class id: " + id);
         }
@@ -103,13 +103,13 @@ public class SchoolClassController {
     @PostMapping("/{id}/students/{studentId}")
     public void registerStudentToClass(@PathVariable Integer id, @PathVariable Integer studentId){
 
-        Optional<SchoolClass> foundClass = schoolClassRepository.findById(id);
+        Optional<SchoolClass> foundClass = schoolClassService.findById(id);
         if(!foundClass.isPresent()){
             throw new ResourceNotFoundException("Class id: " + id);
         }
         SchoolClass actualClass = foundClass.get();
 
-        Optional<Student> foundStudent = studentRepository.findById(studentId);
+        Optional<Student> foundStudent = studentService.findById(studentId);
         if(!foundStudent.isPresent()){
             throw new ResourceNotFoundException("Student id: " + studentId);
         }
@@ -120,11 +120,11 @@ public class SchoolClassController {
         }
 
         actualStudent.setSchoolClass(actualClass);
-        studentRepository.save(actualStudent);
+        studentService.save(actualStudent);
 
         // update student count
         actualClass.setStudentCount(actualClass.getStudents().size());
-        schoolClassRepository.save(actualClass);
+        schoolClassService.save(actualClass);
     }
 //    @PostMapping("/{id}/students/{studentId}")
 //    public void registerStudentToClass(@PathVariable Integer id, @PathVariable Integer studentId){
@@ -152,7 +152,7 @@ public class SchoolClassController {
 
     public boolean isStudentAlreadyInClass(@PathVariable Integer id, @PathVariable Integer studentId){
 
-        Optional<SchoolClass> foundClass = schoolClassRepository.findById(id);
+        Optional<SchoolClass> foundClass = schoolClassService.findById(id);
         if(!foundClass.isPresent()){
             throw new ResourceNotFoundException("Class id: " + id);
         }
@@ -169,13 +169,13 @@ public class SchoolClassController {
     @PostMapping("/{id}/teachers/{teacherId}")
     public Teacher registerTeacherToClass(@PathVariable Integer id, @PathVariable Integer teacherId){
 
-        Optional<SchoolClass> foundClass = schoolClassRepository.findById(id);
+        Optional<SchoolClass> foundClass = schoolClassService.findById(id);
         if(!foundClass.isPresent()){
             throw new ResourceNotFoundException("Class id: " + id);
         }
         SchoolClass actualClass = foundClass.get();
 
-        Optional<Teacher> foundTeacher = teacherRepository.findById(teacherId);
+        Optional<Teacher> foundTeacher = teacherService.findById(teacherId);
         if(!foundTeacher.isPresent()){
             throw new ResourceNotFoundException("Teacher id: " + teacherId);
         }
@@ -184,8 +184,8 @@ public class SchoolClassController {
         actualClass.getTeacherSet().add(actualTeacher);
         actualTeacher.getSchoolClassSet().add(actualClass);
 
-        schoolClassRepository.save(actualClass);
-        teacherRepository.save(actualTeacher);
+        schoolClassService.save(actualClass);
+        teacherService.save(actualTeacher);
 
         return actualTeacher;
     }

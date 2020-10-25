@@ -2,7 +2,7 @@ package com.management.schoolmanagementv3.Controller;
 
 import com.management.schoolmanagementv3.Entity.Student;
 import com.management.schoolmanagementv3.Exception.ResourceNotFoundException;
-import com.management.schoolmanagementv3.Repository.StudentRepository;
+import com.management.schoolmanagementv3.Service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,18 +18,30 @@ import java.util.Optional;
 public class StudentController {
 
     @Autowired
-    private StudentRepository studentRepository;
+    private StudentService studentService;
 
     @GetMapping("/")
     public List<Student> getAllStudents(){
 
-        return studentRepository.findAll();
+        return studentService.findAll();
+    }
+
+    @GetMapping("/findbyfirstname/{firstName}")
+    public Student getAllStudents(@PathVariable String firstName){
+
+        return studentService.findByFirstName(firstName);
+    }
+
+    @GetMapping("/findbyfirstnameandlastname/{firstName}/{lastName}")
+    public Student getAllStudents(@PathVariable String firstName, @PathVariable String lastName){
+
+        return studentService.findByFirstNameAndLastName(firstName, lastName);
     }
 
     @GetMapping("/{id}")
     public Student getStudentById(@PathVariable Integer id){
 
-        Optional<Student> foundStudent = studentRepository.findById(id);
+        Optional<Student> foundStudent = studentService.findById(id);
 
         if(!foundStudent.isPresent()){
             throw new ResourceNotFoundException("Student id: "+ id);
@@ -40,7 +52,7 @@ public class StudentController {
     @PostMapping("/")
     public ResponseEntity<Object> createStudent(@Valid @RequestBody Student student){
 
-        Student savedStudent = studentRepository.save(student);
+        Student savedStudent = studentService.save(student);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(savedStudent.getId()).toUri();
 
@@ -50,17 +62,17 @@ public class StudentController {
     @DeleteMapping("/{id}")
     public void deleteStudent(@PathVariable Integer id){
 
-        Optional<Student> foundStudent = studentRepository.findById(id);
+        Optional<Student> foundStudent = studentService.findById(id);
         if(!foundStudent.isPresent()){
             throw new ResourceNotFoundException("Student id: " + id);
         }
-        studentRepository.delete(foundStudent.get());
+        studentService.delete(foundStudent.get());
     }
 
     @PutMapping("/{id}")
     public Student updateStudent(@PathVariable Integer id, @RequestBody Student student){
 
-        Optional<Student> foundStudent = studentRepository.findById(id);
+        Optional<Student> foundStudent = studentService.findById(id);
         if(!foundStudent.isPresent()){
             throw new ResourceNotFoundException("Student id: " + id);
         }
@@ -70,7 +82,7 @@ public class StudentController {
         actualStudent.setFirstName(student.getFirstName());
         actualStudent.setLastName(student.getLastName());
 
-        return studentRepository.save(actualStudent);
+        return studentService.save(actualStudent);
     }
 
 
